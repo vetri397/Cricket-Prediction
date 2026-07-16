@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
+import os
 
 from styles import load_css
+from train_model import train_model
 
 # =====================================================
 # PAGE CONFIGURATION
@@ -24,7 +26,17 @@ st.markdown(load_css(), unsafe_allow_html=True)
 
 @st.cache_resource
 def load_model():
+
+    if not os.path.exists("cricket_predictor.pkl"):
+
+        st.info("⚙️ Model not found. Training AI model... Please wait.")
+
+        train_model()
+
+        st.success("✅ Model trained successfully!")
+
     return joblib.load("cricket_predictor.pkl")
+
 
 model = load_model()
 

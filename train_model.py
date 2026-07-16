@@ -1,45 +1,61 @@
 import pandas as pd
+import joblib
+
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
-import joblib
 
-# Load features
-df = pd.read_csv("features.csv")
 
-# Remove rows where Last5_Avg is 0 (not enough history)
-df = df[df["Last5_Avg"] > 0]
+def train_model():
 
-# Features (Input)
-X = df[["Career_Avg", "Last5_Avg", "Strike Rate", "Fours", "Sixes"]]
+    # Load features
+    df = pd.read_csv("features.csv")
 
-# Target (Output)
-y = df["Runs"]
+    # Remove players without enough history
+    df = df[df["Last5_Avg"] > 0]
 
-# Split dataset
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42
-)
+    # Features
+    X = df[
+        [
+            "Career_Avg",
+            "Last5_Avg",
+            "Strike Rate",
+            "Fours",
+            "Sixes"
+        ]
+    ]
 
-# Train model
-model = RandomForestRegressor(
-    n_estimators=200,
-    random_state=42
-)
+    # Target
+    y = df["Runs"]
 
-model.fit(X_train, y_train)
+    # Train/Test Split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=42
+    )
 
-# Predict
-predictions = model.predict(X_test)
+    # Model
+    model = RandomForestRegressor(
+        n_estimators=200,
+        random_state=42
+    )
 
-# Accuracy
-mae = mean_absolute_error(y_test, predictions)
+    model.fit(X_train, y_train)
 
-print("Mean Absolute Error:", round(mae, 2))
+    predictions = model.predict(X_test)
 
-# Save model
-joblib.dump(model, "cricket_predictor.pkl")
+    mae = mean_absolute_error(y_test, predictions)
 
-print("\n✅ Model Trained Successfully!")
+    print("Mean Absolute Error:", round(mae, 2))
+
+    joblib.dump(model, "cricket_predictor.pkl")
+
+    print("✅ Model Saved Successfully")
+
+    return model
+
+
+if __name__ == "__main__":
+    train_model()
